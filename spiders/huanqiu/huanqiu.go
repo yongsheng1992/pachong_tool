@@ -57,10 +57,11 @@ func Run() error {
 		paths := strings.Split(path, "/")
 		filename := paths[len(paths)-1]
 		dir := strings.Replace(path, "/"+filename, "", 1)
-		_, err := os.Stat(host + dir)
+		imageRoot := "images/"
+		_, err := os.Stat(imageRoot + host + dir)
 		if err != nil {
 			if !os.IsExist(err) {
-				if err := os.MkdirAll(host+dir, os.ModePerm); err != nil {
+				if err := os.MkdirAll(imageRoot+host+dir, os.ModePerm); err != nil {
 					fmt.Println(err)
 				}
 			} else {
