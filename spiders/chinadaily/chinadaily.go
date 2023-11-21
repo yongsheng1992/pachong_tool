@@ -91,7 +91,7 @@ func Run() error {
 			}
 		}
 
-		if err := response.Save(fmt.Sprintf("%s%s/%s", host, dir, filename)); err != nil {
+		if err := response.Save(fmt.Sprintf("%s%s%s/%s", imageRoot, host, dir, filename)); err != nil {
 			fmt.Println(err)
 		}
 	})

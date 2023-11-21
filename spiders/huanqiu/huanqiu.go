@@ -68,8 +68,8 @@ func Run() error {
 				panic(err)
 			}
 		}
-
-		if err := response.Save(fmt.Sprintf("%s%s/%s", host, dir, filename)); err != nil {
+		fmt.Println("save image ", filename)
+		if err := response.Save(fmt.Sprintf("%s%s%s/%s", imageRoot, host, dir, filename)); err != nil {
 			fmt.Println(err)
 		}
 	})
