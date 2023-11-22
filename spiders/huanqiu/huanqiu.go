@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/yongsheng1992/webspiders/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -17,7 +18,7 @@ import (
 
 const name = "环球网"
 
-func Run() error {
+func Run(log *logrus.Logger) error {
 	dsn := os.Getenv("dsn")
 	if dsn == "" {
 		dsn = "root:root@tcp(127.0.0.1:3306)/spiders?charset=utf8mb4&parseTime=True&loc=Local"
@@ -75,6 +76,7 @@ func Run() error {
 	})
 
 	detailCollector.OnHTML("article", func(element *colly.HTMLElement) {
+		log.Info("Crawl ", element.Request.URL.String())
 		news := &models.News{
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
@@ -88,10 +90,8 @@ func Run() error {
 				news.Title = element.Text
 			case "article-content":
 				contentWithTags, _ := element.DOM.Html()
-				fmt.Println(html.UnescapeString(contentWithTags))
 				query, err := goquery.NewDocumentFromReader(strings.NewReader(html.UnescapeString(contentWithTags)))
 				if err != nil {
-					fmt.Println(err)
 					return
 				}
 				query.Find("img").Each(func(i int, selection *goquery.Selection) {
@@ -118,7 +118,7 @@ func Run() error {
 					pic = "https:" + pic
 				}
 				if err := imageCollector.Visit(pic); err != nil {
-					fmt.Println(err)
+					log.Error(err)
 				}
 				news.CoverPic = pic
 			}
@@ -134,7 +134,7 @@ func Run() error {
 		if err := db.Clauses(clause.OnConflict{
 			DoUpdates: clause.AssignmentColumns([]string{"update_time", "content", "origin_link", "cover_pic"}),
 		}).Create(news).Error; err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	})
 	c.OnHTML("a[href]", func(element *colly.HTMLElement) {
@@ -146,7 +146,6 @@ func Run() error {
 		if !match {
 			return
 		}
-		fmt.Println(link)
 		if err := detailCollector.Visit(link); err != nil {
 			fmt.Println(err)
 		}

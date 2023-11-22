@@ -3,6 +3,7 @@ package chinadaily
 import (
 	"fmt"
 	"github.com/gocolly/colly/v2"
+	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -17,7 +18,7 @@ import (
 
 const name = "中国日报网"
 
-func Run() error {
+func Run(log *logrus.Logger) error {
 	dsn := os.Getenv("dsn")
 	if dsn == "" {
 		dsn = "root:root@tcp(127.0.0.1:3306)/spiders?charset=utf8mb4&parseTime=True&loc=Local"
@@ -63,13 +64,12 @@ func Run() error {
 			}
 			coverPics[link] = coverPic
 			if err := imageCollector.Visit(coverPic); err != nil {
-				fmt.Println(err)
+				log.Error(err)
 			}
 		}
-		fmt.Printf("Link found: %q - %s\n", element.Text, element.Attr("href"))
 
 		if err := detailCollector.Visit(link); err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	})
 
@@ -92,10 +92,11 @@ func Run() error {
 		}
 
 		if err := response.Save(fmt.Sprintf("%s%s%s/%s", imageRoot, host, dir, filename)); err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	})
 	detailCollector.OnHTML("div.container", func(element *colly.HTMLElement) {
+		log.Error("Crawl ", element.Request.URL.String())
 		news := &models.News{
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
@@ -128,7 +129,7 @@ func Run() error {
 		if err := db.Clauses(clause.OnConflict{
 			DoUpdates: clause.AssignmentColumns([]string{"update_time", "content"}),
 		}).Create(news).Error; err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 	})
 	if err := c.Visit("https://cn.chinadaily.com.cn/"); err != nil {
