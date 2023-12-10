@@ -12,8 +12,9 @@ type News struct {
 	OriginLink string    `json:"origin_link"`
 	CreateTime time.Time `json:"create_time"`
 	UpdateTime time.Time `json:"update_time"`
+	Tag        string    `json:"tag"`
 }
 
-func (news News) TableName() string {
-	return "article"
-}
+//func (news News) TableName() string {
+//	return "article"
+//}

@@ -75,12 +75,14 @@ func Run(log *logrus.Logger) error {
 		}
 	})
 
-	detailCollector.OnHTML("article", func(element *colly.HTMLElement) {
-		log.Info("Crawl ", element.Request.URL.String())
+	detailCollector.OnHTML("html", func(element *colly.HTMLElement) {
+		keywords, _ := element.DOM.Find("meta[name='keywords']").Attr("content")
+
 		news := &models.News{
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
 			Source:     name,
+			Tag:        keywords,
 		}
 
 		element.ForEach("textarea", func(i int, element *colly.HTMLElement) {
