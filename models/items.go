@@ -15,6 +15,6 @@ type News struct {
 	Tag        string    `json:"tag"`
 }
 
-//func (news News) TableName() string {
-//	return "article"
-//}
+func (news News) TableName() string {
+	return "article"
+}
