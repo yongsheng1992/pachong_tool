@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/yongsheng1992/webspiders/spiders/chinadaily"
 	"github.com/yongsheng1992/webspiders/spiders/huanqiu"
+	"github.com/yongsheng1992/webspiders/spiders/sohu"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"os/signal"
@@ -47,6 +48,9 @@ func main() {
 			log.Error(err)
 		}
 		if err := chinadaily.Run(log); err != nil {
+			log.Error(err)
+		}
+		if err := sohu.Run(log); err != nil {
 			log.Error(err)
 		}
 		select {
