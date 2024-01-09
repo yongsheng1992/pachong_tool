@@ -2,6 +2,7 @@ package chinadaily
 
 import (
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
@@ -90,7 +91,7 @@ func Run(log *logrus.Logger) error {
 				panic(err)
 			}
 		}
-
+		fmt.Println("save image ", filename)
 		if err := response.Save(fmt.Sprintf("%s%s%s/%s", imageRoot, host, dir, filename)); err != nil {
 			log.Error(err)
 		}
@@ -116,8 +117,22 @@ func Run(log *logrus.Logger) error {
 				if err := imageCollector.Visit(src); err != nil {
 					fmt.Println(err)
 				}
+
 			})
 			contentWithTags, _ := element.DOM.Html()
+			html, _ := element.DOM.Html()
+			q, _ := goquery.NewDocumentFromReader(strings.NewReader(html))
+			q.Find("img").Each(func(i int, selection *goquery.Selection) {
+				src := element.Attr("src")
+				if strings.HasPrefix(src, "//") {
+					src = "https:" + src
+				}
+				if src != "" {
+					src = strings.Replace(src, "https://", "https://{#myhost#}/", 1)
+					selection.SetAttr("src", src)
+				}
+			})
+			contentWithTags, _ = q.Html()
 			news.Content = strings.TrimSpace(contentWithTags)
 		})
 		url := element.Request.URL

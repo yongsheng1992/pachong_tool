@@ -125,20 +125,19 @@ func Run(log *logrus.Logger) error {
 			}
 			query.Find("script").Remove()
 			query.Find("iframe").Remove()
-			query.Find("img").Each(func(_ int, selection *goquery.Selection) {
-				pic, ok := selection.Attr("src")
-				fmt.Println(pic)
-				if !ok || pic == "" {
-					return
-				}
-				if strings.HasPrefix(pic, "//") {
-					pic = "https:" + pic
-				}
-				if err := imageCollector.Visit(pic); err != nil {
-					fmt.Println(err)
-					return
-				}
-			})
+			//query.Find("img").Each(func(_ int, selection *goquery.Selection) {
+			//	pic, ok := selection.Attr("data-src")
+			//	if !ok || pic == "" {
+			//		return
+			//	}
+			//	if strings.HasPrefix(pic, "//") {
+			//		pic = "https:" + pic
+			//	}
+			//	if err := imageCollector.Visit(pic); err != nil {
+			//		fmt.Println(err)
+			//		return
+			//	}
+			//})
 			content = html.UnescapeString(contentWithTags)
 		})
 		news.Title = title

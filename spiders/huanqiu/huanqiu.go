@@ -109,7 +109,10 @@ func Run(log *logrus.Logger) error {
 						fmt.Println(err)
 						return
 					}
+					pic = strings.Replace(pic, "https://", "https://{#myhost#}/", 1)
+					selection.SetAttr("src", pic)
 				})
+				contentWithTags, _ = query.Find("article").Html()
 				news.Content = strings.TrimSpace(html.UnescapeString(contentWithTags))
 			case "article-cover":
 				pic := element.Text
